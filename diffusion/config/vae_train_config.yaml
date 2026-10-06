@@ -1,0 +1,33 @@
+model: VAE
+
+train:
+  epochs: 2
+  lr: 0.001
+  kl_weight: 0.0001
+
+  dataset:
+    dataset_path: "/home/yuxin/workspace/data/datasets/VLAFactory/train"
+    batch_method: "dynamic"
+    indices: null
+    max_batch_pixels: 4_194_304
+    max_batch_size: 32
+    shuffle: True
+    seed: 0
+    num_workers: 4
+    pin_memory: True
+    persistent_workers: True
+    prefetch_factor: 2
+
+val:
+  dataset:
+    dataset_path: "/home/yuxin/workspace/data/datasets/VLAFactory/val"
+    batch_method: "dynamic"
+    indices: null
+    max_batch_pixels: 4_194_304
+    max_batch_size: 32
+    shuffle: False
+    seed: 0
+    num_workers: 4
+    pin_memory: True
+    persistent_workers: True
+    prefetch_factor: 2
