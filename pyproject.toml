@@ -1,0 +1,33 @@
+[project]
+name = "vlafactory"
+version = "0.1.0"
+description = "Add your description here"
+readme = "README.md"
+authors = [
+    { name = "yuxin@ubt2404", email = "slyx361@outlook.com" }
+]
+requires-python = ">=3.13"
+dependencies = [
+    "torch>=2.14.1",
+    "torchvision>=0.29.1",
+    "safetensors>=0.5",
+    "tiktoken>=0.12",
+    "pillow>=11",
+    "matplotlib>=3.11.2",
+    "pandas>=3.0.6",
+    "pyarrow>=25.0.1",
+    "tqdm>=4.70.1",
+    "wandb>=0.30.0",
+]
+
+[tool.uv]
+package = false
+
+[tool.uv.sources]
+torch = { index = "pytorch-cu132" }
+torchvision = { index = "pytorch-cu132" }
+
+[[tool.uv.index]]
+name = "pytorch-cu132"
+url = "https://download.pytorch.org/whl/cu132"
+explicit = true
