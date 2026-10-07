@@ -87,7 +87,7 @@ def _replace_output(staging_dir, output_dir):
         shutil.rmtree(backup_dir)
 
 
-def process_diffusiondb_data(workspace_dir, post_processed_dataset_name):
+def process_diffusiondb_data(dataset_dir, post_processed_dataset_name, split):
     """Build a fresh processed dataset from poloclub/images and metadata.parquet.
 
     Keep source images byte-for-byte, with their original resolutions and aspect
@@ -100,18 +100,17 @@ def process_diffusiondb_data(workspace_dir, post_processed_dataset_name):
     The output dataset name may be a relative path such as VLAFactory/val.
     Return counts of copied and skipped images along with the output directory.
     """
-    dataset_path = Path(post_processed_dataset_name)
+    post_processed_dataset_name = Path(post_processed_dataset_name)
     if (not post_processed_dataset_name
-            or not dataset_path.parts
-            or dataset_path.is_absolute()
-            or ".." in dataset_path.parts):
+            or not post_processed_dataset_name.parts
+            or post_processed_dataset_name.is_absolute()
+            or ".." in post_processed_dataset_name.parts):
         raise ValueError("post_processed_dataset_name must be a relative dataset path without '..'")
 
-    datasets_dir = Path(workspace_dir) / "data" / "dataset"
-    dataset_dir = datasets_dir / "poloclub" / "diffusiondb"
-    images_dir = dataset_dir / "images/train"
-    output_dir = datasets_dir / dataset_path / "post_processed_images"
-    if not output_dir.resolve().is_relative_to(datasets_dir.resolve()):
+    dataset_dir = Path(f"{dataset_dir}")
+    images_dir = dataset_dir / "images" / split
+    output_dir = dataset_dir / post_processed_dataset_name
+    if not output_dir.resolve().is_relative_to(dataset_dir.resolve()):
         raise ValueError("Output must remain inside the datasets directory")
 
     part_dirs = sorted(path for path in images_dir.glob("part-*") if path.is_dir())
@@ -189,16 +188,11 @@ def process_diffusiondb_data(workspace_dir, post_processed_dataset_name):
                 full_json.append({
                     "image": image_name,
                     "prompt": labels["p"],
-                    "se": labels["se"],
-                    "c": labels["c"],
-                    "st": labels["st"],
-                    "sa": labels["sa"],
-                    "source_image_name": image_path.name,
-                    "source_part_id": part_id,
-                    **extra,
+                    "width": extra["width"],
+                    "height": extra["height"],
                 })
 
-        json_path = staging_dir / "post_processed_images-labels.json"
+        json_path = staging_dir / "labels.json"
         with json_path.open("w", encoding="utf-8") as file:
             json.dump(full_json, file, ensure_ascii=False, indent=4, allow_nan=False)
             file.write("\n")
@@ -214,11 +208,15 @@ def process_diffusiondb_data(workspace_dir, post_processed_dataset_name):
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("--workspace-dir", default="/home/yuxin/workspace")
+    parser.add_argument("--dataset-dir", default="/home/yuxin/workspace/data/datasets/poloclub/diffusiondb")
     parser.add_argument(
-        "--dataset-name", default="VLAFactory/train",
+        "--dataset-name", default="VLAFactory",
         help="Output dataset path relative to data/datasets (e.g. VLAFactory/val)",
     )
+    parser.add_argument(
+        "--split", default="train",
+        help="Dataset split to process (e.g. train, val, test)",
+    )
     args = parser.parse_args()
-    summary = process_diffusiondb_data(args.workspace_dir, args.dataset_name)
+    summary = process_diffusiondb_data(args.dataset_dir, args.dataset_name, args.split)
     print(json.dumps(summary, indent=2))
