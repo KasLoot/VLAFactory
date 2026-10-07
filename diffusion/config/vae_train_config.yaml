@@ -1,12 +1,33 @@
 model: VAE
+model_kwargs:
+  input_dim: 3
+  latent_dim: 4
+  base_channels: 64
+
+wandb:
+  project: "vlafactory-vae"
+  entity: null
+  name: null
+  mode: "online" # online, offline, or disabled
+  dir: "runs/wandb"
+  log_every_steps: 50 # optimizer updates, not dataloader batches
+  num_images: 8 # fixed validation examples; 0 disables previews
+
+checkpoint:
+  dir: "checkpoints/vae" # each run gets its own subdirectory
+  selection_metric: "val/recon_mse" # minimized; also supports val/loss, val/kl, val/weighted_kl
+  save_every_epochs: 0 # 0 keeps only last.pt and best.pt
+  upload_best: false # upload best.pt as a W&B artifact at the end
 
 train:
   epochs: 2
   lr: 0.001
   kl_weight: 0.0001
+  seed: 0
+  accumulation_samples: 64
 
   dataset:
-    dataset_path: "/home/yuxin/workspace/data/datasets/VLAFactory/train"
+    dataset_path: "/workspace/data/dataset/VLAFactory/train/post_processed_images"
     batch_method: "dynamic"
     indices: null
     max_batch_pixels: 4_194_304
@@ -20,7 +41,7 @@ train:
 
 val:
   dataset:
-    dataset_path: "/home/yuxin/workspace/data/datasets/VLAFactory/val"
+    dataset_path: "/workspace/data/dataset/VLAFactory/val/post_processed_images"
     batch_method: "dynamic"
     indices: null
     max_batch_pixels: 4_194_304

@@ -107,9 +107,9 @@ def process_diffusiondb_data(workspace_dir, post_processed_dataset_name):
             or ".." in dataset_path.parts):
         raise ValueError("post_processed_dataset_name must be a relative dataset path without '..'")
 
-    datasets_dir = Path(workspace_dir) / "data" / "datasets"
-    dataset_dir = datasets_dir / "poloclub"
-    images_dir = dataset_dir / "images/val"
+    datasets_dir = Path(workspace_dir) / "data" / "dataset"
+    dataset_dir = datasets_dir / "poloclub" / "diffusiondb"
+    images_dir = dataset_dir / "images/train"
     output_dir = datasets_dir / dataset_path / "post_processed_images"
     if not output_dir.resolve().is_relative_to(datasets_dir.resolve()):
         raise ValueError("Output must remain inside the datasets directory")

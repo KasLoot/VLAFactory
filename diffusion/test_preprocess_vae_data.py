@@ -20,12 +20,12 @@ class PreprocessingTests(unittest.TestCase):
         self.temporary = tempfile.TemporaryDirectory(prefix="vae-preprocessing-test-")
         self.addCleanup(self.temporary.cleanup)
         self.workspace = Path(self.temporary.name)
-        self.source = self.workspace / "data/datasets/poloclub"
-        self.output = self.workspace / "data/datasets/processed/post_processed_images"
+        self.source = self.workspace / "data/dataset/poloclub/diffusiondb"
+        self.output = self.workspace / "data/dataset/processed/post_processed_images"
         self.rows = []
 
     def add_image(self, part_id, name, size=(4, 3), color=(20, 40, 60), **overrides):
-        part = self.source / "images/val" / f"part-{part_id:06d}"
+        part = self.source / "images/train" / f"part-{part_id:06d}"
         part.mkdir(parents=True, exist_ok=True)
         path = part / name
         with Image.new("RGB", size, color=color) as image:
@@ -64,7 +64,7 @@ class PreprocessingTests(unittest.TestCase):
     def test_nested_dataset_path(self):
         source = self.add_image(1, "a.png")
         self.write_parquet()
-        self.output = self.workspace / "data/datasets/VLAFactory/val/post_processed_images"
+        self.output = self.workspace / "data/dataset/VLAFactory/val/post_processed_images"
         with redirect_stderr(io.StringIO()):
             summary = preprocessing.process_diffusiondb_data(self.workspace, "VLAFactory/val")
         self.assertEqual(summary["output_dir"], str(self.output))
@@ -80,7 +80,7 @@ class PreprocessingTests(unittest.TestCase):
         self.assertFalse((self.workspace / "data").exists())
 
     def test_dataset_symlink_cannot_escape_datasets_directory(self):
-        datasets = self.workspace / "data/datasets"
+        datasets = self.workspace / "data/dataset"
         datasets.mkdir(parents=True)
         outside = self.workspace / "outside"
         outside.mkdir()
@@ -177,7 +177,7 @@ class PreprocessingTests(unittest.TestCase):
         with self.assertRaisesRegex(FileNotFoundError, "Missing part metadata"):
             self.run_preprocessing()
         self.assertEqual(before, self.snapshot())
-        (self.source / "images/val/part-000001/part-000001.json").unlink()
+        (self.source / "images/train/part-000001/part-000001.json").unlink()
         with self.assertRaisesRegex(FileNotFoundError, "Missing part metadata"):
             self.run_preprocessing()
         self.assertEqual(before, self.snapshot())
